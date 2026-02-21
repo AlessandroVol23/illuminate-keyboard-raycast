@@ -1,0 +1,14 @@
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+
+# Swift build artifacts
+swift/.build
+swift/.swiftpm
+swift/Package.resolved
+
+# misc
+.DS_Store
+dist/
