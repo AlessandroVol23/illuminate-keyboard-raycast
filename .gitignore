@@ -11,3 +11,4 @@ swift/.swiftpm
 # misc
 .DS_Store
 dist/
+.claude/
