@@ -18,7 +18,7 @@ struct KB: ParsableCommand {
         let client = KeyboardBrightnessClient()
 
         guard let keyboards = client.copyKeyboardBacklightIDs(), !keyboards.isEmpty else {
-            fputs("No backlit keyboard found\n", stderr)
+            fputs("Your Mac or connected keyboard does not have a backlight\n", stderr)
             throw ExitCode.failure
         }
 
@@ -29,8 +29,11 @@ struct KB: ParsableCommand {
             let brightness = client.brightness(forKeyboard: keyboardID)
             let rounded = Double(round(brightness * 100)) / 100
             let json: [String: Any] = ["brightness": rounded]
-            let data = try! JSONSerialization.data(withJSONObject: json, options: [])
-            let str = String(data: data, encoding: .utf8)!
+            let data = try JSONSerialization.data(withJSONObject: json, options: [])
+            guard let str = String(data: data, encoding: .utf8) else {
+                fputs("Failed to encode brightness response\n", stderr)
+                throw ExitCode.failure
+            }
             print(str)
         case "set":
             guard let valueStr = brightness, let value = Float(valueStr) else {
@@ -38,9 +41,11 @@ struct KB: ParsableCommand {
                 throw ExitCode.failure
             }
             let clamped = min(max(value, 0), 1)
-            // Disable auto-brightness so manual control takes effect
             if client.isAutoBrightnessEnabled(forKeyboard: keyboardID) {
-                client.enableAutoBrightness(false, forKeyboard: keyboardID)
+                let disabled = client.enableAutoBrightness(false, forKeyboard: keyboardID)
+                if !disabled {
+                    fputs("Warning: Could not disable auto-brightness\n", stderr)
+                }
             }
             let result = client.setBrightness(clamped, forKeyboard: keyboardID)
             if !result {

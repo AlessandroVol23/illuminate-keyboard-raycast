@@ -2,9 +2,9 @@ import { closeMainWindow, showHUD } from "@raycast/api";
 import { getKeyboardBrightness, setKeyboardBrightness } from "./utils";
 
 export default async function command() {
-  await closeMainWindow();
-
   try {
+    await closeMainWindow();
+
     const brightness = await getKeyboardBrightness();
 
     if (brightness > 0) {
